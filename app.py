@@ -215,11 +215,11 @@ def serve_puzzle():
     image_path = f'{FILE_PREF}sudoku_puzzle.jpg'
     for _ in range(3):
         if os.path.exists(image_path):
-            response = make_response(send_file(image_path))
+            response = make_response(send_file(image_path, mimetype='image/jpeg'))
             response.headers['Content-Type'] = 'image/jpeg'
             response.headers['Access-Control-Allow-Methods'] = 'GET'
             response.headers['Access-Control-Allow-Origin'] = '*'
-            response.headers['Cache-Control'] = 'max-age=315360000, public'
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
             return response
         else:
             time.sleep(1)
@@ -231,11 +231,11 @@ def serve_solution():
     image_path = f'{FILE_PREF}sudoku_solution.jpg'
     for _ in range(3):
         if os.path.exists(image_path):
-            response = make_response(send_file(image_path))
+            response = make_response(send_file(image_path, mimetype='image/jpeg'))
             response.headers['Content-Type'] = 'image/jpeg'
             response.headers['Access-Control-Allow-Methods'] = 'GET'
             response.headers['Access-Control-Allow-Origin'] = '*'
-            response.headers['Cache-Control'] = 'max-age=315360000, public'
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
             return response
         else:
             time.sleep(1)
