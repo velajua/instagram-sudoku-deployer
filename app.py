@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import requests
 import numpy as np
@@ -138,7 +139,7 @@ which has {full}/{empty + full} numbers.
 #online #brainpuzzles #numberlandpuzzles #secondaryteacher #rjsclasses
 #sudokoclass #onlinecoaching
 """
-    print(caption)
+    print(caption, file=sys.stdout)
 
     puzzle_img = draw_sudoku(*puzzle_data)
     solution_img = draw_sudoku(*solution_data)
@@ -150,15 +151,15 @@ which has {full}/{empty + full} numbers.
 
     puzzle_img.save(f"{FILE_PREF}sudoku_puzzle.png")
     solution_img.save(f"{FILE_PREF}sudoku_solution.png")
-    print('Generated Sudoku pair')
+    print('Generated Sudoku pair', file=sys.stdout)
 
     secret = load_secrets()
     access_token = secret.get('access_token')
     instagram_user_id = secret.get('instagram_user_id')
 
     image_urls = [
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku-puzzle.png",
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku-solution.png"
+        "https://https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku-puzzle.png",
+        "https://https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku-solution.png"
     ]
     creation_ids = []
     for image_url in image_urls:
@@ -173,9 +174,9 @@ which has {full}/{empty + full} numbers.
         creation_id = upload_data.get("id")
         if creation_id:
             creation_ids.append(creation_id)
-            print(f"Uploaded image, Creation ID: {creation_id}")
+            print(f"Uploaded image, Creation ID: {creation_id}", file=sys.stdout)
         else:
-            print(f"Error uploading image: {upload_data}")
+            print(f"Error uploading image: {upload_data}", file=sys.stdout)
     if len(creation_ids) == len(image_urls):
         carousel_payload = {
             'access_token': access_token,
@@ -188,9 +189,9 @@ which has {full}/{empty + full} numbers.
         carousel_data = carousel_response.json()
         if 'id' in carousel_data:
             carousel_creation_id = carousel_data['id']
-            print(f"Carousel container created with ID: {carousel_creation_id}")
+            print(f"Carousel container created with ID: {carousel_creation_id}", file=sys.stdout)
         else:
-            print(f"Error creating carousel container: {carousel_data}")
+            print(f"Error creating carousel container: {carousel_data}", file=sys.stdout)
         publish_url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media_publish"
         publish_payload = {
             'creation_id': carousel_creation_id,
@@ -199,11 +200,11 @@ which has {full}/{empty + full} numbers.
         publish_response = requests.post(publish_url, data=publish_payload)
         publish_data = publish_response.json()
         if 'id' in publish_data:
-            print(f"Carousel post published with ID: {publish_data['id']}")
+            print(f"Carousel post published with ID: {publish_data['id']}", file=sys.stdout)
         else:
-            print(f"Error publishing carousel post: {publish_data}")
+            print(f"Error publishing carousel post: {publish_data}", file=sys.stdout)
     else:
-        print("Not all images were uploaded successfully.")
+        print("Not all images were uploaded successfully.", file=sys.stdout)
     verify_token_data(secret)
     return '200'
 
