@@ -108,12 +108,12 @@ def normal_random_0_to_100(mean=50, stddev=15, lower=0, upper=100):
             return value
 
 
-@app.route('/', methods=['GET'])
+@app.route('/')
 def main_caller():
     return "Main Page", 200
 
 
-@app.route('/upload_sudokus', methods=['GET'])
+@app.route('/upload_sudokus')
 def upload_sudokus():
     width=randint(2, 5)
     height=randint(2, 4) if width == 5 else randint(3, 5) if width == 2 else randint(3, 4)
@@ -210,7 +210,7 @@ which has {full}/{empty + full} numbers.
     return "Data Uploaded", 200
 
 
-@app.route('/sudoku_puzzle.png', methods=['GET'])
+@app.route('/sudoku_puzzle.png')
 def serve_puzzle():
     image_path = f'{FILE_PREF}sudoku_puzzle.png'
     if os.path.exists(image_path):
@@ -223,7 +223,7 @@ def serve_puzzle():
             return "Image not found", 404
 
 
-@app.route('/sudoku_solution.png', methods=['GET'])
+@app.route('/sudoku_solution.png')
 def serve_solution():
     image_path = f'{FILE_PREF}sudoku_solution.png'
     if os.path.exists(image_path):
@@ -236,7 +236,7 @@ def serve_solution():
             return "Image not found", 404
 
 
-@app.route('/logo.jpeg', methods=['GET'])
+@app.route('/logo.jpeg')
 def serve_logo():
     image_path = 'logo.jpeg'
     if os.path.exists(image_path):
