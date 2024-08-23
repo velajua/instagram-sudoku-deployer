@@ -5,6 +5,7 @@ import time
 import requests
 import numpy as np
 
+from io import BytesIO
 from sudoku import Sudoku
 from datetime import datetime
 from random import randint, normalvariate
@@ -108,6 +109,17 @@ def normal_random_0_to_100(mean=50, stddev=15, lower=0, upper=100):
             return value
 
 
+def get_hosted_image_url(image, imgbb_token):
+    image_io = BytesIO()
+    image.save(image_io, format='JPEG')
+    image_io.seek(0) 
+    url = f'https://api.imgbb.com/1/upload?key={imgbb_token}&expiration=60'
+    files = {'image': ('sudoku_puzzle.jpg', image_io, 'image/jpeg')}
+    response = requests.post(url, files=files)
+    if response.status_code == 200:
+        return response.json().get('data', {}).get('url')
+
+
 @app.route('/', methods=['GET'])
 def main_caller():
     return "Main Page", 200
@@ -157,11 +169,9 @@ which has {full}/{empty + full} numbers.
     secret = load_secrets()
     access_token = secret.get('access_token')
     instagram_user_id = secret.get('instagram_user_id')
+    imgbb_token = secret.get('imgbb_token')
 
-    image_urls = [
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_puzzle.jpg",
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_solution.jpg"
-    ]
+    image_urls = [get_hosted_image_url(puzzle_img, imgbb_token), get_hosted_image_url(solution_img, imgbb_token)]
     creation_ids = []
     for image_url in image_urls:
         upload_url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media"
