@@ -149,8 +149,8 @@ which has {full}/{empty + full} numbers.
     solution_img = Image.fromarray(solution_img)
     solution_img = solution_img.rotate(180)
 
-    puzzle_img.save(f"{FILE_PREF}sudoku_puzzle.png")
-    solution_img.save(f"{FILE_PREF}sudoku_solution.png")
+    puzzle_img.save(f"{FILE_PREF}sudoku_puzzle.jpg")
+    solution_img.save(f"{FILE_PREF}sudoku_solution.jpg")
     print('Generated Sudoku pair', file=sys.stdout)
 
     secret = load_secrets()
@@ -158,8 +158,8 @@ which has {full}/{empty + full} numbers.
     instagram_user_id = secret.get('instagram_user_id')
 
     image_urls = [
-        "https://https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_puzzle.png",
-        "https://https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_solution.png"
+        "https://https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_puzzle.jpg",
+        "https://https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_solution.jpg"
     ]
     creation_ids = []
     for image_url in image_urls:
@@ -209,29 +209,28 @@ which has {full}/{empty + full} numbers.
     return '200'
 
 
-@app.route('/sudoku_puzzle.png')
+@app.route('/sudoku_puzzle.jpg')
 def serve_puzzle():
-    image_path = f'{FILE_PREF}sudoku_puzzle.png'
+    image_path = f'{FILE_PREF}sudoku_puzzle.jpg'
     if os.path.exists(image_path):
-        return send_file(image_path, mimetype='image/png')
+        return send_file(image_path, mimetype='image/jpeg')
     else:
         return "Image not found", 404
 
 
-@app.route('/sudoku_solution.png')
+@app.route('/sudoku_solution.jpg')
 def serve_solution():
-    image_path = f'{FILE_PREF}sudoku_solution.png'
+    image_path = f'{FILE_PREF}sudoku_solution.jpg'
     if os.path.exists(image_path):
-        return send_file(image_path, mimetype='image/png')
+        return send_file(image_path, mimetype='image/jpeg')
     else:
         return "Image not found", 404
-
 
 
 @app.route('/logo.jpeg')
 def serve_logo():
     image_path = 'logo.jpeg'
     if os.path.exists(image_path):
-        return send_file(image_path, mimetype='image/png')
+        return send_file(image_path, mimetype='image/jpeg')
     else:
         return "Image not found", 404
