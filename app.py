@@ -39,7 +39,7 @@ def draw_sudoku(board, height, width, cell_size=60, margin=20, line_width=3, clu
         lw = cluster_line_width if j % width == 0 else line_width
         draw.line((margin + j * cell_size, margin, margin + j * cell_size, img_height - margin), fill='black', width=lw)
     try:
-        font = ImageFont.truetype("arial.ttf", int(cell_size * 0.7))
+        font = ImageFont.truetype("Arial.ttf", int(cell_size * 0.7))
     except IOError:
         font = ImageFont.load_default()
     for i, row in enumerate(board):
@@ -150,8 +150,8 @@ which has {full}/{empty + full} numbers.
     solution_img = Image.fromarray(solution_img)
     solution_img = solution_img.rotate(180)
 
-    puzzle_img.save(f"{FILE_PREF}sudoku_puzzle.jpg", 'JPEG')
-    solution_img.save(f"{FILE_PREF}sudoku_solution.jpg", 'JPEG')
+    puzzle_img.save(f"{FILE_PREF}sudoku_puzzle.jpeg", 'JPEG')
+    solution_img.save(f"{FILE_PREF}sudoku_solution.jpeg", 'JPEG')
     print('Generated Sudoku pair', file=sys.stdout)
 
     secret = load_secrets()
@@ -159,8 +159,8 @@ which has {full}/{empty + full} numbers.
     instagram_user_id = secret.get('instagram_user_id')
 
     image_urls = [
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_puzzle.jpg",
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_solution.jpg"
+        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_puzzle.jpeg",
+        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_solution.jpeg"
     ]
     creation_ids = []
     for image_url in image_urls:
@@ -207,12 +207,17 @@ which has {full}/{empty + full} numbers.
     else:
         print("Not all images were uploaded successfully.", file=sys.stdout)
     verify_token_data(secret)
+    try:
+        os.unlink(f'{FILE_PREF}sudoku_puzzle.jpeg')
+        os.unlink(f'{FILE_PREF}sudoku_solution.jpeg')
+    except Exception as e:
+        print(f"Error removing file {FILE_PREF}sudoku_puzzle.jpeg or {FILE_PREF}sudoku_solution.jpeg: {e}", file=sys.stdout)
     return "Data Uploaded", 200
 
 
-@app.route('/sudoku_puzzle.jpg', methods=['GET'])
+@app.route('/sudoku_puzzle.jpeg', methods=['GET'])
 def serve_puzzle():
-    image_path = f'{FILE_PREF}sudoku_puzzle.jpg'
+    image_path = f'{FILE_PREF}sudoku_puzzle.jpeg'
     for _ in range(0, 3):
         if os.path.exists(image_path):
             return send_file(image_path, mimetype='image/jpeg')
@@ -221,9 +226,9 @@ def serve_puzzle():
     return "Image not found", 404
 
 
-@app.route('/sudoku_solution.jpg', methods=['GET'])
+@app.route('/sudoku_solution.jpeg', methods=['GET'])
 def serve_solution():
-    image_path = f'{FILE_PREF}sudoku_solution.jpg'
+    image_path = f'{FILE_PREF}sudoku_solution.jpeg'
     for _ in range(0, 3):
         if os.path.exists(image_path):
             return send_file(image_path, mimetype='image/jpeg')
