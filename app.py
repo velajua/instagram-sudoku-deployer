@@ -167,7 +167,7 @@ which has {full}/{empty + full} numbers.
         upload_url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media"
         payload = {
             'image_url': image_url,
-            'is_carousel_item': 'true',
+            'is_carousel_item': True,
             'access_token': access_token
         }
         upload_response = requests.post(upload_url, data=payload)
