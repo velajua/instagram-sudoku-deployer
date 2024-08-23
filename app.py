@@ -207,11 +207,6 @@ which has {full}/{empty + full} numbers.
     else:
         print("Not all images were uploaded successfully.", file=sys.stdout)
     verify_token_data(secret)
-    try:
-        os.unlink(f'{FILE_PREF}sudoku_puzzle.jpeg')
-        os.unlink(f'{FILE_PREF}sudoku_solution.jpeg')
-    except Exception as e:
-        print(f"Error removing file {FILE_PREF}sudoku_puzzle.jpeg or {FILE_PREF}sudoku_solution.jpeg: {e}", file=sys.stdout)
     return "Data Uploaded", 200
 
 
