@@ -7,9 +7,9 @@ import numpy as np
 
 from sudoku import Sudoku
 from datetime import datetime
-from flask import Flask, send_file
 from random import randint, normalvariate
 from PIL import Image, ImageDraw, ImageFont
+from flask import Flask, send_file, make_response
 
 from google.cloud import secretmanager
 
@@ -213,9 +213,11 @@ which has {full}/{empty + full} numbers.
 @app.route('/sudoku_puzzle.jpg', methods=['GET'])
 def serve_puzzle():
     image_path = f'{FILE_PREF}sudoku_puzzle.jpg'
-    for _ in range(0, 3):
+    for _ in range(3):
         if os.path.exists(image_path):
-            return send_file(image_path, mimetype='image/jpeg')
+            response = make_response(send_file(image_path))
+            response.headers['Content-Type'] = 'image/jpeg'
+            return response
         else:
             time.sleep(1)
     return "Image not found", 404
@@ -224,9 +226,11 @@ def serve_puzzle():
 @app.route('/sudoku_solution.jpg', methods=['GET'])
 def serve_solution():
     image_path = f'{FILE_PREF}sudoku_solution.jpg'
-    for _ in range(0, 3):
+    for _ in range(3):
         if os.path.exists(image_path):
-            return send_file(image_path, mimetype='image/jpeg')
+            response = make_response(send_file(image_path))
+            response.headers['Content-Type'] = 'image/jpeg'
+            return response
         else:
             time.sleep(1)
     return "Image not found", 404
