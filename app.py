@@ -211,7 +211,7 @@ which has {full}/{empty + full} numbers.
 
 @app.route('/sudoku_puzzle.png')
 def serve_puzzle():
-    image_path = 'sudoku_puzzle.png'
+    image_path = f'{FILE_PREF}sudoku_puzzle.png'
     if os.path.exists(image_path):
         return send_file(image_path, mimetype='image/png')
     else:
@@ -220,11 +220,12 @@ def serve_puzzle():
 
 @app.route('/sudoku_solution.png')
 def serve_solution():
-    image_path = 'sudoku_solution.png'
+    image_path = f'{FILE_PREF}sudoku_solution.png'
     if os.path.exists(image_path):
         return send_file(image_path, mimetype='image/png')
     else:
         return "Image not found", 404
+
 
 
 @app.route('/logo.jpeg')
