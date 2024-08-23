@@ -108,12 +108,12 @@ def normal_random_0_to_100(mean=50, stddev=15, lower=0, upper=100):
             return value
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def main_caller():
     return "Main Page", 200
 
 
-@app.route('/upload_sudokus')
+@app.route('/upload_sudokus', methods=['GET'])
 def upload_sudokus():
     width=randint(2, 5)
     height=randint(2, 4) if width == 5 else randint(3, 5) if width == 2 else randint(3, 4)
@@ -150,8 +150,8 @@ which has {full}/{empty + full} numbers.
     solution_img = Image.fromarray(solution_img)
     solution_img = solution_img.rotate(180)
 
-    puzzle_img.save(f"{FILE_PREF}sudoku_puzzle.png")
-    solution_img.save(f"{FILE_PREF}sudoku_solution.png")
+    puzzle_img.save(f"{FILE_PREF}sudoku_puzzle.jpg", 'JPEG')
+    solution_img.save(f"{FILE_PREF}sudoku_solution.jpg", 'JPEG')
     print('Generated Sudoku pair', file=sys.stdout)
 
     secret = load_secrets()
@@ -159,8 +159,8 @@ which has {full}/{empty + full} numbers.
     instagram_user_id = secret.get('instagram_user_id')
 
     image_urls = [
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_puzzle.png",
-        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_solution.png"
+        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_puzzle.jpg",
+        "https://instagram-sudoku-deployer-4r64swfrtq-uc.a.run.app/sudoku_solution.jpg"
     ]
     creation_ids = []
     for image_url in image_urls:
@@ -210,36 +210,32 @@ which has {full}/{empty + full} numbers.
     return "Data Uploaded", 200
 
 
-@app.route('/sudoku_puzzle.png')
+@app.route('/sudoku_puzzle.jpg', methods=['GET'])
 def serve_puzzle():
-    image_path = f'{FILE_PREF}sudoku_puzzle.png'
-    if os.path.exists(image_path):
-        return send_file(image_path, mimetype='image/png')
-    else:
-        time.sleep(1)
+    image_path = f'{FILE_PREF}sudoku_puzzle.jpg'
+    for _ in range(0, 3):
         if os.path.exists(image_path):
-            return send_file(image_path, mimetype='image/png')
+            return send_file(image_path, mimetype='image/jpeg')
         else:
-            return "Image not found", 404
+            time.sleep(1)
+    return "Image not found", 404
 
 
-@app.route('/sudoku_solution.png')
+@app.route('/sudoku_solution.jpg', methods=['GET'])
 def serve_solution():
-    image_path = f'{FILE_PREF}sudoku_solution.png'
-    if os.path.exists(image_path):
-        return send_file(image_path, mimetype='image/png')
-    else:
-        time.sleep(1)
+    image_path = f'{FILE_PREF}sudoku_solution.jpg'
+    for _ in range(0, 3):
         if os.path.exists(image_path):
-            return send_file(image_path, mimetype='image/png')
+            return send_file(image_path, mimetype='image/jpeg')
         else:
-            return "Image not found", 404
+            time.sleep(1)
+    return "Image not found", 404
 
 
-@app.route('/logo.jpeg')
+@app.route('/logo.jpeg', methods=['GET'])
 def serve_logo():
     image_path = 'logo.jpeg'
     if os.path.exists(image_path):
-        return send_file(image_path, mimetype='image/png')
+        return send_file(image_path, mimetype='image/jpeg')
     else:
         return "Image not found", 404
