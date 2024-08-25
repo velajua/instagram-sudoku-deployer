@@ -135,29 +135,30 @@ def get_hosted_image_url(image, imgbb_token):
 
 
 def interact_with_latest_post(instagram_user_id, access_token):
-    url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media?fields=id,caption&access_token={access_token}&limit=1"
+    url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media?fields=id,caption&access_token={access_token}&limit=2"
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Error fetching latest post: {response.json()}")
     latest_post_data = response.json()
     if 'data' in latest_post_data and latest_post_data['data']:
-        latest_post_id = latest_post_data['data'][0]['id']
-        comments_url = f"https://graph.facebook.com/v20.0/{latest_post_id}/comments?access_token={access_token}"
-        comments_response = requests.get(comments_url)
-        comments_data = comments_response.json()
-        if 'data' in comments_data and comments_data['data']:
-            top_comments = comments_data['data'][:3]
-            for comment in top_comments:
-                comment_url = f"https://graph.facebook.com/v20.0/{comment['id']}/replies"
-                comment_payload = {
-                    'message': choice(replies),
-                    'access_token': access_token
-                }
-                comment_response = requests.post(comment_url, data=comment_payload)
-                if comment_response.status_code == 200:
-                    print(f"Replied to comment: {comment['id']}", file=sys.stdout)
-                else:
-                    print(f"Failed to reply to comment: {comment['id']}, Error: {comment_response.json()}")
+        for post_data in latest_post_data['data']:
+            latest_post_id = post_data['id']
+            comments_url = f"https://graph.facebook.com/v20.0/{latest_post_id}/comments?access_token={access_token}"
+            comments_response = requests.get(comments_url)
+            comments_data = comments_response.json()
+            if 'data' in comments_data and comments_data['data']:
+                top_comments = comments_data['data'][:3]
+                for comment in top_comments:
+                    comment_url = f"https://graph.facebook.com/v20.0/{comment['id']}/replies"
+                    comment_payload = {
+                        'message': choice(replies),
+                        'access_token': access_token
+                    }
+                    comment_response = requests.post(comment_url, data=comment_payload)
+                    if comment_response.status_code == 200:
+                        print(f"Replied to comment: {comment['id']}", file=sys.stdout)
+                    else:
+                        print(f"Failed to reply to comment: {comment['id']}, Error: {comment_response.json()}", file=sys.stdout)
     else:
         raise Exception("No posts found.")
 
@@ -211,7 +212,7 @@ which has {full}/{empty + full} numbers.
 
     secret = load_secrets()
     try:
-        requests.post(url_for('interact_with_post', _external=True), json=secret, timeout=0.1)
+        requests.post(url_for('interact_with_post'), json=secret, timeout=0.1)
     except Exception as e:
         pass
     access_token = secret.get('access_token')
