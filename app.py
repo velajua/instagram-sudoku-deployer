@@ -11,7 +11,7 @@ from replies import replies
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 from random import randint, normalvariate, choice
-from flask import Flask, send_file, make_response, url_for
+from flask import Flask, send_file, make_response, url_for, request
 
 from google.cloud import secretmanager
 
@@ -269,7 +269,7 @@ which has {full}/{empty + full} numbers.
 
 
 @app.route('/interact_with_post', methods=['POST'])
-def interact_with_post(request):
+def interact_with_post():
     secret = request.json
     instagram_user_id = secret.get('instagram_user_id')
     access_token = secret.get('access_token')
