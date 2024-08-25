@@ -7,10 +7,11 @@ import numpy as np
 
 from io import BytesIO
 from sudoku import Sudoku
+from replies import replies
 from datetime import datetime
-from random import randint, normalvariate
 from PIL import Image, ImageDraw, ImageFont
-from flask import Flask, send_file, make_response
+from random import randint, normalvariate, choice
+from flask import Flask, send_file, make_response, url_for
 
 from google.cloud import secretmanager
 
@@ -26,7 +27,8 @@ def create_sudoku(width, height, difficulty):
     return puzzle_data, solution_data
 
 
-def draw_sudoku(board, height, width, cell_size=60, margin=20, line_width=3, cluster_line_width=6):
+def draw_sudoku(board, height, width, cell_size=60,
+                margin=20, line_width=3, cluster_line_width=6):
     rows = len(board)
     cols = len(board[0])
     img_width = cols * cell_size + 2 * margin
@@ -35,10 +37,14 @@ def draw_sudoku(board, height, width, cell_size=60, margin=20, line_width=3, clu
     draw = ImageDraw.Draw(img)
     for i in range(rows + 1):
         lw = cluster_line_width if i % height == 0 else line_width
-        draw.line((margin, margin + i * cell_size, img_width - margin, margin + i * cell_size), fill='black', width=lw)
+        draw.line((margin, margin + i * cell_size,
+                   img_width - margin, margin + i * cell_size),
+                  fill='black', width=lw)
     for j in range(cols + 1):
         lw = cluster_line_width if j % width == 0 else line_width
-        draw.line((margin + j * cell_size, margin, margin + j * cell_size, img_height - margin), fill='black', width=lw)
+        draw.line((margin + j * cell_size, margin,
+                   margin + j * cell_size, img_height - margin),
+                  fill='black', width=lw)
     try:
         font = ImageFont.truetype("Arial.ttf", int(cell_size * 0.7))
     except IOError:
@@ -70,11 +76,15 @@ def update_secrets(old_secret, new_access_token):
     secret_name = f"projects/{project_id}/secrets/{secret_id}"
     old_secret['access_token'] = new_access_token
     updated_secret_payload = json.dumps(old_secret)
-    response = client.add_secret_version(request={"parent": secret_name, "payload": {"data": updated_secret_payload.encode("UTF-8")}})
+    response = client.add_secret_version(
+        request={"parent": secret_name,
+                 "payload": {"data": updated_secret_payload.encode("UTF-8")}}
+    )
     new_version_name = response.name
     versions = client.list_secret_versions(request={"parent": secret_name})
     for version in versions:
-        if version.name != new_version_name and version.state != secretmanager.SecretVersion.State.DESTROYED:
+        if (version.name != new_version_name and
+                version.state != secretmanager.SecretVersion.State.DESTROYED):
             client.destroy_secret_version(request={"name": version.name})
 
 
@@ -94,15 +104,19 @@ def verify_token_data(secret):
     response = requests.get(debug_url)
     token_data = response.json()
     if response.status_code == 200:
-        expiration_datetime = datetime.fromtimestamp(token_data['data']['data_access_expires_at'])
+        expiration_datetime = datetime.fromtimestamp(
+            token_data['data']['data_access_expires_at'])
         if (expiration_datetime - datetime.now()).days < 7:
-            new_token = refresh_token(secret['app_id'], secret['app_secret'], secret['access_token'])
+            new_token = refresh_token(secret['app_id'],
+                                      secret['app_secret'],
+                                      secret['access_token'])
             update_secrets(secret, new_token)
     else:
         raise Exception(f"Error: {token_data}")
 
 
-def normal_random_0_to_100(mean=50, stddev=15, lower=0, upper=100):
+def normal_random_0_to_100(mean=50, stddev=15,
+                           lower=0, upper=100):
     while True:
         value = normalvariate(mean, stddev)
         if lower <= value <= upper:
@@ -120,6 +134,34 @@ def get_hosted_image_url(image, imgbb_token):
         return response.json().get('data', {}).get('url')
 
 
+def interact_with_latest_post(instagram_user_id, access_token):
+    url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media?fields=id,caption&access_token={access_token}&limit=1"
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Error fetching latest post: {response.json()}")
+    latest_post_data = response.json()
+    if 'data' in latest_post_data and latest_post_data['data']:
+        latest_post_id = latest_post_data['data'][0]['id']
+        comments_url = f"https://graph.facebook.com/v20.0/{latest_post_id}/comments?access_token={access_token}"
+        comments_response = requests.get(comments_url)
+        comments_data = comments_response.json()
+        if 'data' in comments_data and comments_data['data']:
+            top_comments = comments_data['data'][:3]
+            for comment in top_comments:
+                comment_url = f"https://graph.facebook.com/v20.0/{comment['id']}/replies"
+                comment_payload = {
+                    'message': choice(replies),
+                    'access_token': access_token
+                }
+                comment_response = requests.post(comment_url, data=comment_payload)
+                if comment_response.status_code == 200:
+                    print(f"Replied to comment: {comment['id']}", file=sys.stdout)
+                else:
+                    print(f"Failed to reply to comment: {comment['id']}, Error: {comment_response.json()}")
+    else:
+        raise Exception("No posts found.")
+
+
 @app.route('/', methods=['GET'])
 def main_caller():
     return "Main Page", 200
@@ -128,10 +170,11 @@ def main_caller():
 @app.route('/upload_sudokus', methods=['GET'])
 def upload_sudokus():
     width=randint(2, 5)
-    height=randint(2, 4) if width == 5 else randint(3, 5) if width == 2 else randint(3, 4)
+    height=randint(2, 4) if width == 5 else randint(
+        3, 5) if width == 2 else randint(3, 4)
     difficulty=normal_random_0_to_100()/100
-    puzzle_data, solution_data = create_sudoku(width, height, difficulty)
-
+    puzzle_data, solution_data = create_sudoku(
+        width, height, difficulty)
     empty = 0; full = 0
     for i in puzzle_data[0]:
         for j in i:
@@ -167,11 +210,16 @@ which has {full}/{empty + full} numbers.
     print('Generated Sudoku pair', file=sys.stdout)
 
     secret = load_secrets()
+    try:
+        requests.post(url_for('interact_with_post', _external=True), json=secret, timeout=0.1)
+    except Exception as e:
+        pass
     access_token = secret.get('access_token')
     instagram_user_id = secret.get('instagram_user_id')
     imgbb_token = secret.get('imgbb_token')
 
-    image_urls = [get_hosted_image_url(puzzle_img, imgbb_token), get_hosted_image_url(solution_img, imgbb_token)]
+    image_urls = [get_hosted_image_url(puzzle_img, imgbb_token),
+                  get_hosted_image_url(solution_img, imgbb_token)]
     creation_ids = []
     for image_url in image_urls:
         upload_url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media"
@@ -220,6 +268,18 @@ which has {full}/{empty + full} numbers.
     return "Data Uploaded", 200
 
 
+@app.route('/interact_with_post', methods=['POST'])
+def interact_with_post(request):
+    secret = request.json
+    instagram_user_id = secret.get('instagram_user_id')
+    access_token = secret.get('access_token')
+    try:
+        interact_with_latest_post(instagram_user_id, access_token)
+    except Exception as e:
+        pass
+    return "Interaction initiated", 200
+
+
 @app.route('/sudoku_puzzle.jpg', methods=['GET'])
 def serve_puzzle():
     image_path = f'{FILE_PREF}sudoku_puzzle.jpg'
@@ -259,3 +319,29 @@ def serve_logo():
         return send_file(image_path, mimetype='image/jpeg')
     else:
         return "Image not found", 404
+
+
+@app.route('/sitemap.xml', methods=['GET'])
+def generate_sitemap():
+    urls = []
+    static_urls = [
+        'serve_logo',
+        'serve_puzzle',
+        'serve_solution',
+        'main_caller',
+        'upload_sudokus',
+    ]
+    for rule in app.url_map.iter_rules():
+        if rule.endpoint in static_urls:
+            urls.append(url_for(rule.endpoint, _external=True))
+    sitemap = ['<?xml version="1.0" encoding="UTF-8"?>']
+    sitemap.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for url in urls:
+        sitemap.append('<url>')
+        sitemap.append(f'<loc>{url}</loc>')
+        sitemap.append('</url>')
+    sitemap.append('</urlset>')
+    sitemap_xml = '\n'.join(sitemap)
+    response = make_response(sitemap_xml)
+    response.headers['Content-Type'] = 'application/xml'
+    return response
