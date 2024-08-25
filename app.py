@@ -328,6 +328,7 @@ def generate_sitemap():
         'serve_logo',
         'serve_puzzle',
         'serve_solution',
+        'interact_with_post',
         'main_caller',
         'upload_sudokus',
     ]
