@@ -17,4 +17,4 @@ EXPOSE 8080
 ENV FLASK_ENV=production
 
 # Run gunicorn server
-CMD ["gunicorn", "--workers", "4", "--threads", "2", "--bind", "0.0.0.0:8080", "app:app"]
+CMD ["gunicorn", "--workers", "4", "--threads", "2", "--timeout", "180", "--bind", "0.0.0.0:8080", "app:app"]
