@@ -130,6 +130,7 @@ def get_hosted_image_url(image, imgbb_token):
     url = f'https://api.imgbb.com/1/upload?key={imgbb_token}&expiration=60'
     files = {'image': ('sudoku_puzzle.jpg', image_io, 'image/jpeg')}
     response = requests.post(url, files=files)
+    print(response.json(), file=sys.stdout)
     if response.status_code == 200:
         return response.json().get('data', {}).get('url')
 
