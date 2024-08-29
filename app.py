@@ -126,13 +126,18 @@ def normal_random_0_to_100(mean=50, stddev=15,
 def get_hosted_image_url(image, imgbb_token):
     image_io = BytesIO()
     image.save(image_io, format='JPEG')
-    image_io.seek(0) 
+    image_io.seek(0)
     url = f'https://api.imgbb.com/1/upload?key={imgbb_token}&expiration=60'
     files = {'image': ('sudoku_puzzle.jpg', image_io, 'image/jpeg')}
-    response = requests.post(url, files=files, timeout=10)
-    print(response.content, file=sys.stdout)
-    if response.status_code == 200:
-        return response.json().get('data', {}).get('url')
+    for i in range(3):
+        try:
+            response = requests.post(url, files=files, timeout=10, verify=False)
+            response.raise_for_status()
+            return response.json().get('data', {}).get('url')
+        except Exception as e:
+            print(f"Attempt {i+1}: Error uploading image: {e}", file=sys.stdout)
+            time.sleep(2 ** i)
+    return None
 
 
 def interact_with_latest_post(instagram_user_id, access_token):
