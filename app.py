@@ -140,6 +140,28 @@ def get_hosted_image_url(image, imgbb_token):
     return None
 
 
+def host_image_freeimage(image, free_image_token):
+    image_io = BytesIO()
+    image.save(image_io, format='JPEG')
+    image_io.seek(0)
+    url = "https://freeimage.host/api/1/upload"
+    files = {'source': image_io}
+    data = {
+        'key': free_image_token,
+        'action': 'upload',
+        'format': 'json'
+    }
+    response = requests.post(url, files=files, data=data)
+    if response.status_code == 200:
+        response_json = response.json()
+        if response_json.get("status_code") == 200:
+            return response_json['image']['display_url']
+        else:
+            raise Exception(f"Error in upload: {response_json.get('status_txt')}")
+    else:
+        response.raise_for_status()
+
+
 def interact_with_latest_post(instagram_user_id, access_token):
     url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media?fields=id,caption&access_token={access_token}&limit=2"
     response = requests.get(url)
@@ -224,9 +246,12 @@ which has {full}/{empty + full} numbers.
     access_token = secret.get('access_token')
     instagram_user_id = secret.get('instagram_user_id')
     imgbb_token = secret.get('imgbb_token')
+    free_image_token = secret.get('free_image_token')
 
-    image_urls = [get_hosted_image_url(puzzle_img, imgbb_token),
-                  get_hosted_image_url(solution_img, imgbb_token)]
+    # image_urls = [get_hosted_image_url(puzzle_img, imgbb_token),
+    #               get_hosted_image_url(solution_img, imgbb_token)]
+    image_urls = [host_image_freeimage(puzzle_img, free_image_token),
+                  host_image_freeimage(solution_img, free_image_token)]
     creation_ids = []
     for image_url in image_urls:
         upload_url = f"https://graph.facebook.com/v20.0/{instagram_user_id}/media"
