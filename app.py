@@ -240,9 +240,10 @@ which has {full}/{empty + full} numbers.
 
     secret = load_secrets()
     try:
-        requests.post(url_for('interact_with_post'), json=secret, timeout=0.1)
+        r = requests.post(url_for('interact_with_post', _external=True), json=secret)
+        print(r.content, file=sys.stdout)
     except Exception as e:
-        pass
+        print(f'Exception handling interactions: {e}', file=sys.stdout)
     access_token = secret.get('access_token')
     instagram_user_id = secret.get('instagram_user_id')
     imgbb_token = secret.get('imgbb_token')
