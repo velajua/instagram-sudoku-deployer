@@ -240,7 +240,7 @@ which has {full}/{empty + full} numbers.
 
     secret = load_secrets()
     try:
-        r = requests.post(url_for('interact_with_post', _external=True), json=secret)
+        r = requests.post('/interact_with_post', json=secret)
         print(r.content, file=sys.stdout)
     except Exception as e:
         print(f'Exception handling interactions: {e}', file=sys.stdout)
