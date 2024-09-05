@@ -240,11 +240,7 @@ which has {full}/{empty + full} numbers.
 
     secret = load_secrets()
     try:
-        r = requests.post(
-            'https://instagram-sudoku-deployer-31722434708.us-central1.run.app/interact_with_post',
-            json=secret
-        )
-        print(r.content, file=sys.stdout)
+        interact_with_post(secret)
     except Exception as e:
         print(f'Exception handling interactions: {e}', file=sys.stdout)
     access_token = secret.get('access_token')
@@ -304,16 +300,13 @@ which has {full}/{empty + full} numbers.
     return "Data Uploaded", 200
 
 
-@app.route('/interact_with_post', methods=['POST'])
-def interact_with_post():
-    secret = request.json
+def interact_with_post(secret):
     instagram_user_id = secret.get('instagram_user_id')
     access_token = secret.get('access_token')
     try:
         interact_with_latest_post(instagram_user_id, access_token)
     except Exception as e:
-        pass
-    return "Interaction initiated", 200
+        print(f'Error in interaction: {e}', file=sys.stdout)
 
 
 @app.route('/sudoku_puzzle.jpg', methods=['GET'])
